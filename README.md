@@ -11,3 +11,11 @@ I run a modest homelab to automate my home, host my own services, and store my o
 - TP Link 8-Port Gigabit PoE+ Switch
 
 - Raspberry Pi 4
+
+## Software
+
+### Router
+
+#### Block internet access for all IoT devices
+
+I accomplished this by creating a Parental Controls profile for all IoT devices, and then turn off the 'Internet Access' toggle.
