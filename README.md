@@ -2,7 +2,7 @@
 
 I value simplicity and minimalism. Even as a computer scientist, I use as little software as possible. I want my operating system to be lightweight and performant, free from bloatware, telemetry and spyware, or unnecessary features. Full configurability and complete control over my system are essential to me. Therefore, I exclusively use [Arch Linux](https://archlinux.org/).
 
-My entire installation process is automated by two scripts: `install` and `configure`. The `install` script performs an  installation of Arch Linux with a zero-bloat base KDE Plasma install, and the `configure` script sets up my preferred software and configurations.
+My installation process is automated by two scripts: `install` and `configure`. The `install` script performs an  installation of Arch Linux with a zero-bloat base KDE Plasma install, and the `configure` script installs and sets up the services I host on my local network. 
 
 ## Pre-installation
 
@@ -81,12 +81,39 @@ My entire installation process is automated by two scripts: `install` and `confi
     ```
 
     Look for the local LAN address (192.168.x.x or 10.x.x.x).
-  
-10. Clone this repo:
+
+11. Remote into the server over the local network:
 
    ```bash
-   curl -O https://raw.githubusercontent.com/dan-smith-tech/homelab/main/configure.sh
+   ssh dan@<ip>
    ```
+
+cat ~/.ssh/id_ed25519.pub on PC
+
+mkdir -p ~/.ssh
+
+nvim ~/.ssh/authorized_keys
+paste pub key
+
+
+back on PC:
+
+sudo mkdir -p /etc/ssh/sshd_config.d
+sudo tee /etc/ssh/sshd_config.d/99-key-only.conf > /dev/null << 'EOF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+EOF
+sudo systemctl reload sshd
+
+still on PC:
+
+nvim ~/.ssh/config
+Host homelab
+  HostName 192.168.x.x
+  User dan 
+  IdentityFile ~/.ssh/id_ed25519
+
 
 11. Run the `configure` script:
 
@@ -95,6 +122,3 @@ My entire installation process is automated by two scripts: `install` and `confi
    ```
 
 12. Follow the prompts. The system will automatically reboot when the configuration is complete.
-
-
-ssh dan@192.168.1.17
