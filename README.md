@@ -74,10 +74,18 @@ My entire installation process is automated by two scripts: `install` and `confi
    nmcli device wifi connect <network> --ask
    ```
 
+10. Get the IP address of the server:
+
+    ```bash
+    ip a
+    ```
+
+    Look for the local LAN address (192.168.x.x or 10.x.x.x).
+  
 10. Clone this repo:
 
    ```bash
-   git clone https://github.com/dan-smith-tech/homelab.git
+   curl -O https://raw.githubusercontent.com/dan-smith-tech/homelab/main/configure.sh
    ```
 
 11. Run the `configure` script:
@@ -87,3 +95,6 @@ My entire installation process is automated by two scripts: `install` and `confi
    ```
 
 12. Follow the prompts. The system will automatically reboot when the configuration is complete.
+
+
+ssh dan@192.168.1.17

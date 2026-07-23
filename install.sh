@@ -88,7 +88,7 @@ useradd -m -g users -G tty,input,video,audio,optical,storage,wheel "$USERNAME"
 passwd "$USERNAME"
 
 # install packages
-pacman -S --noconfirm base base-devel efibootmgr egl-wayland grub kitty linux linux-firmware linux-headers lvm2 networkmanager nvidia-container-toolkit nvidia-open nvidia-utils opencl-nvidia openssh plasma-desktop sudo
+pacman -S --noconfirm base base-devel efibootmgr egl-wayland git grub kitty linux linux-firmware linux-headers lvm2 networkmanager nvidia-container-toolkit nvidia-open nvidia-utils opencl-nvidia openssh plasma-desktop sudo
 
 # allow users in wheel group to use sudo
 echo '%wheel ALL=(ALL:ALL) ALL' >> /etc/sudoers
