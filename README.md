@@ -49,7 +49,7 @@ My entire installation process is automated by two scripts: `install` and `confi
 5. Fetch the `install` script:
 
    ```bash
-   curl -O https://raw.githubusercontent.com/dan-smith-tech/rig/main/install.sh
+   curl -O https://raw.githubusercontent.com/dan-smith-tech/homelab/main/install.sh
    ```
 
 6. Make the script executable:
@@ -77,7 +77,7 @@ My entire installation process is automated by two scripts: `install` and `confi
 10. Clone this repo:
 
    ```bash
-   git clone https://github.com/dan-smith-tech/rig.git
+   git clone https://github.com/dan-smith-tech/homelab.git
    ```
 
 11. Run the `configure` script:
