@@ -16,7 +16,6 @@ cd "$HOME"
 rm -rf "$tmpdir"
 
 # install packages
-sudo pacman -S --noconfirm kitty neovim
 yay -S --noconfirm brave-bin
 
 echo "Automated setup complete. Continue with manual configuration detailed in \`configure.md\`."
