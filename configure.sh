@@ -4,7 +4,7 @@ set -euo pipefail
 
 # set hostname
 read -r -p "Hostname [nilfgaard]: " HOSTNAME
-sudo hostnamectl set-hostname "${HOSTNAME:-novigrad}"
+sudo hostnamectl set-hostname "${HOSTNAME:-nilfgaard}"
 
 # install yay
 tmpdir="$(mktemp -d)"
