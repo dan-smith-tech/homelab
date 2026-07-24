@@ -111,28 +111,6 @@ sudo nmcli con up br0
 
 1. On a client device...
 
-   Create the SSH daemon drop-in directory:
-
-   ```bash
-   sudo mkdir -p /etc/ssh/sshd_config.d
-   ```
-
-   Write the key-only SSH configuration:
-
-   ```bash
-   sudo tee /etc/ssh/sshd_config.d/99-key-only.conf > /dev/null << 'SSHEOF'
-   PasswordAuthentication no
-   KbdInteractiveAuthentication no
-   PubkeyAuthentication yes
-   SSHEOF
-   ```
-
-   Reload `sshd`:
-
-   ```bash
-   sudo systemctl reload sshd
-   ```
-
    Add a host config to `~/.ssh/config`:
 
    ```ssh-config
@@ -152,6 +130,22 @@ sudo nmcli con up br0
 
    ```bash
    mkdir -p ~/.ssh
+   ```
+
+1. Create the SSH daemon H configuration:
+
+   ```bash
+   sudo tee /etc/ssh/sshd_config.d/99-key-only.conf > /dev/null << 'SSHEOF'
+   PasswordAuthentication no
+   KbdInteractiveAuthentication no
+   PubkeyAuthentication yes
+   SSHEOF
+   ```
+
+1. Reload `sshd`:
+
+   ```bash
+   sudo systemctl reload sshd
    ```
 
 1. Fetch the `configure` script:
