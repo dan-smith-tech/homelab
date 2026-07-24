@@ -40,10 +40,12 @@ virt-install \
   --name "$VM_NAME" \
   --description "$VM_DESCRIPTION" \
   --os-variant=generic \
+  --virt-type kvm \
   --ram="$VM_RAM" \
   --vcpus="$VM_VCPUS" \
   --disk "${QCOW2_IMAGE},bus=scsi" \
   --controller type=scsi,model=virtio-scsi \
+  --network bridge=br0,model=virtio \
   --import \
   --graphics none \
   --boot uefi
