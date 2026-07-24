@@ -22,7 +22,7 @@ VM_NAME="haos"
 VM_DESCRIPTION="Home Assistant OS"
 VM_RAM="8192"
 VM_VCPUS="4"
-WORKDIR="${HOME}/haos"
+WORKDIR="/var/lib/libvirt/images/haos"
 COMPRESSED_IMAGE="${WORKDIR}/haos.qcow2.xz"
 QCOW2_IMAGE="${WORKDIR}/haos.qcow2"
 HAOS_IMAGE_URL="$(curl -fsSL https://api.github.com/repos/home-assistant/operating-system/releases/latest \
@@ -31,11 +31,12 @@ HAOS_IMAGE_URL="$(curl -fsSL https://api.github.com/repos/home-assistant/operati
   | grep '\.qcow2\.xz' \
   | cut -d '"' -f 4 \
   | head -n1)"
-mkdir -p "$WORKDIR"
-curl -fL "$HAOS_IMAGE_URL" -o "$COMPRESSED_IMAGE"
-xz -dkf "$COMPRESSED_IMAGE"
-rm -f "$COMPRESSED_IMAGE"
-virt-install \
+sudo mkdir -p "$WORKDIR"
+sudo curl -fL "$HAOS_IMAGE_URL" -o "$COMPRESSED_IMAGE"
+sudo xz -dkf "$COMPRESSED_IMAGE"
+sudo rm -f "$COMPRESSED_IMAGE"
+sudo systemctl enable --now libvirtd
+sudo virt-install \
   --name "$VM_NAME" \
   --description "$VM_DESCRIPTION" \
   --os-variant=generic \
