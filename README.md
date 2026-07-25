@@ -41,7 +41,7 @@ Look for the LAN address (192.168.x.x or 10.x.x.x).
 Remote into the server for the first time:
 
 ```bash
-ssh dan@<ip>
+ssh dan@192.168.x.x
 ```
 
 Add a host config to `~/.ssh/config`:
