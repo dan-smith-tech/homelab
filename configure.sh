@@ -50,3 +50,5 @@ sudo virt-install \
   --import \
   --graphics none \
   --boot uefi
+
+reboot
