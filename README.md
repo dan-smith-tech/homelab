@@ -38,12 +38,6 @@ Look for the LAN address (192.168.x.x or 10.x.x.x).
 
 ## Prepare SSH on Client
 
-Remote into the server for the first time:
-
-```bash
-ssh dan@192.168.x.x
-```
-
 Add a host config to `~/.ssh/config`:
 
 ```ssh-config
@@ -57,6 +51,12 @@ Copy the public key to the clipboard:
 
 ```bash
 wl-copy < ~/.ssh/id_ed25519.pub
+```
+
+Remote into the server for the first time:
+
+```bash
+ssh dan@192.168.x.x
 ```
 
 ## Configure SSH Access on Server
