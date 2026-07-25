@@ -15,6 +15,7 @@ cd "$HOME"
 rm -rf "$tmpdir"
 
 # install packages
+sudo pacman -S egl-wayland kitty plasma-desktop qemu virt-install
 yay -S --noconfirm brave-bin
 
 # home assistant install
