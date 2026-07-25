@@ -79,3 +79,110 @@ chmod +x configure.sh
 ```
 
 Follow the prompts. The system will automatically reboot when the configuration is complete.
+
+## Set up VPN
+
+do following on server and each client...
+
+```bash
+sudo pacman -S wireguard-tools
+```
+
+restrict access of new files to only the owner, generate private key and put in file, and then use that to gen public key:
+
+```bash
+umask 077
+wg genkey > ~/.wg-private.key
+wg pubkey < ~/.wg-private.key > ~/.wg-public.key
+```
+
+pick an internal (LAN) subnet for the tunnel (just use 192.168.2.0/24 and give each peer a unique address in that subnet by incrementing the last octet (192.168.2.1, 192.168.2.2, etc)). this subnet is used for both the server and each client
+
+the following can be used to check what subnets are taken but currently 192.168.2.0/24 is unused so these docs will use that:
+
+```bash
+ip -4 addr show
+ip -4 route show
+```
+
+on server create `/etc/wireguard/wg0.conf`
+
+```bash
+[Interface]
+Address = 192.168.2.1/24
+ListenPort = 51820
+PrivateKey = <contents of server ~/.wg-private.key>
+
+[Peer]
+PublicKey = <contents of client ~/.wg-public.key>
+AllowedIPs = 192.168.2.2/32
+```
+
+now need to assign static ip to the homelab sever box in router settings
+
+find mac address of homelab server:
+
+```bash
+ip link show
+```
+
+look for `enp...` and the `aa:bb:cc:dd:ee:ff` is the MAC address for the interface
+
+in the DHCP section of the router, assign a static IP to the device with the MAC address found above
+
+also add a static IP to the Home assistant interface
+
+now find the router public ip:
+
+```bash
+curl -4 ifconfig.me
+```
+
+Go to the NAT/PAT router settings and create a new port forwarding rule with the following settings:
+
+- Protocol name (if asked): (custom) `WireGuard`
+- Internal port: `51820`
+- External port: `51820`
+- Protocol: `UDP`
+- Target: the homelab interface we assigned a static IP to above
+
+on client create `/etc/wireguard/wg0.conf`
+
+```bash
+[Interface]
+Address = 192.168.2.2/24
+PrivateKey = <contents of client ~/.wg-private.key>
+
+[Peer]
+PublicKey = <contents of server ~/.wg-public.key>
+Endpoint = <router public IP discovered above>:51820
+AllowedIPs = 192.168.2.1/32
+```
+
+create interfaces
+
+on server:
+
+```bash
+sudo ip link add dev wg0 type wireguard
+sudo ip address add dev wg0 192.168.2.1/24
+```
+
+on client:
+
+```bash
+sudo ip link add dev wg0 type wireguard
+sudo ip address add dev wg0 192.168.2.2/24
+```
+
+Bring the interfaces up on both server and clients:
+
+```bash
+sudo wg-quick up /etc/wireguard/wg0.conf
+```
+
+Test the connection from a client on the LAN:
+
+```bash
+ping 192.168.2.1
+```
