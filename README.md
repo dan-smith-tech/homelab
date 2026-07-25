@@ -88,26 +88,38 @@ My installation process is automated by two scripts: `install` and `configure`. 
    ssh dan@<ip>
    ```
 
-Create the bridge:
+1. Create a network bridge for port forwarding:
 
-bash
-sudo nmcli con add type bridge ifname br0 con-name br0 ipv4.method auto ipv6.method ignore
-Add the wired port as a bridge slave:
+   Create the bridge:
 
-bash
-sudo nmcli con add type bridge-slave ifname enp4s0 con-name enp4s0-slave master br0
-Bring down the old wired connection:
+   ```bash
+   sudo nmcli con add type bridge ifname br0 con-name br0 ipv4.method auto ipv6.method ignore
+   ```
 
-bash
-sudo nmcli con down "Wired connection 1"
-Bring up the bridge slave:
+   Add the wired port as a bridge slave:
 
-bash
-sudo nmcli con up enp4s0-slave
-Bring up the bridge:
+   ```bash
+   sudo nmcli con add type bridge-slave ifname enp4s0 con-name enp4s0-slave master br0
+   ```
 
-bash
-sudo nmcli con up br0
+   Bring down the old wired connection:
+
+   ```bash
+   sudo nmcli con down "Wired connection 1"
+   ```
+
+   Bring up the bridge slave:
+
+   ```bash
+   sudo nmcli con up enp4s0-slave
+   ```
+
+   Bring up the bridge:
+
+   ```bash
+   sudo nmcli con up br0
+
+   ```
 
 1. On a client device...
 
