@@ -18,7 +18,7 @@ Follow the prompts. The system will automatically reboot when the installation i
 
 ## Set up Network Bridge
 
-Log in and replace the wired interface with a bridge for port forwarding (update `enp4s0` to match your interface):
+Log in and replace the wired interface with a bridge for port forwarding:
 
 ```bash
 sudo nmcli con add type bridge ifname br0 con-name br0 ipv4.method auto ipv6.method ignore
@@ -68,7 +68,7 @@ mkdir -p ~/.ssh
 nvim ~/.ssh/authorized_keys
 ```
 
-## Setup Services
+## Set up Services
 
 Run the `configure` script:
 
