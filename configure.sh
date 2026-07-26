@@ -50,5 +50,6 @@ sudo virt-install \
   --import \
   --graphics none \
   --boot uefi
+sudo virsh autostart "$VM_NAME"
 
 reboot
