@@ -107,7 +107,7 @@ ip -4 route show
 
 on server create `/etc/wireguard/wg0.conf`
 
-```bash
+```ini
 [Interface]
 Address = 192.168.2.1/24
 ListenPort = 51820
@@ -126,11 +126,11 @@ find mac address of homelab server:
 ip link show
 ```
 
-look for `enp...` and the `aa:bb:cc:dd:ee:ff` is the MAC address for the interface
+look for the bridged network and the `aa:bb:cc:dd:ee:ff` is the MAC address for the interface
 
 in the DHCP section of the router, assign a static IP to the device with the MAC address found above
 
-also add a static IP to the Home assistant interface
+also add a static IP to the Home assistant interface while we're at it
 
 now find the router public ip:
 
@@ -146,6 +146,8 @@ Go to the NAT/PAT router settings and create a new port forwarding rule with the
 - Protocol: `UDP`
 - Target: the homelab interface we assigned a static IP to above
 
+if the ISP is setting CGNAT, disable it to prevent sharing public ipv4s with others
+
 on client create `/etc/wireguard/wg0.conf`
 
 ```bash
@@ -156,7 +158,7 @@ PrivateKey = <contents of client ~/.wg-private.key>
 [Peer]
 PublicKey = <contents of server ~/.wg-public.key>
 Endpoint = <router public IP discovered above>:51820
-AllowedIPs = 192.168.2.1/32
+AllowedIPs = 192.168.2.1/32, 192.168.1.0/24
 ```
 
 create interfaces
@@ -178,11 +180,47 @@ sudo ip address add dev wg0 192.168.2.2/24
 Bring the interfaces up on both server and clients:
 
 ```bash
-sudo wg-quick up /etc/wireguard/wg0.conf
+sudo wg-quick up wg0
 ```
 
-Test the connection from a client on the LAN:
+Enable WireGuard to start on boot:
+
+```bash
+sudo systemctl enable wg-quick@wg0
+```
+
+### Enable IP Forwarding (Server Only)
+
+Allow the server to forward traffic between the tunnel and the LAN:
+
+```bash
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.d/99-wireguard.conf
+sudo sysctl -p /etc/sysctl.d/99-wireguard.conf
+```
+
+### Set Up Source NAT (Server Only)
+
+Rewrite the source IP of tunnel traffic so home LAN services know how to reply back. Without this, devices on the LAN receive packets from `192.168.2.x` and try to reply directly, but the router has no route back to that subnet.
+
+```bash
+sudo iptables -t nat -A POSTROUTING -o br0 -j MASQUERADE
+```
+
+Make this persistent across reboots:
+
+```bash
+cat <<'EOF' | sudo tee /etc/iptables/rules-save > /dev/null
+*nat
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -o br0 -j MASQUERADE
+COMMIT
+EOF
+sudo systemctl enable --now iptables.service
+```
+
+### Test the Connection
 
 ```bash
 ping 192.168.2.1
+curl http://192.168.1.21:8123
 ```
