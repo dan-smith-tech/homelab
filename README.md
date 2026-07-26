@@ -209,7 +209,7 @@ sudo iptables -t nat -A POSTROUTING -o br0 -j MASQUERADE
 Make this persistent across reboots:
 
 ```bash
-cat <<'EOF' | sudo tee /etc/iptables/rules-save > /dev/null
+cat <<'EOF' | sudo tee /etc/iptables/iptables.rules > /dev/null
 *nat
 :POSTROUTING ACCEPT [0:0]
 -A POSTROUTING -o br0 -j MASQUERADE
