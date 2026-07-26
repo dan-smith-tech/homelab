@@ -249,3 +249,13 @@ Find your PC's LAN IP with `ip addr show` (look for the `inet` line under `eno1`
 ```bash
 curl http://<your-pc-ip>:11434/api/tags
 ```
+
+## Home Assistant Wake on LAN
+
+Enable in BIOS (Advanced -> APM COnfiguration -> Power On by PCI-E)
+
+Find PC MAC address:
+
+```bash
+ip link show
+```
