@@ -224,3 +224,28 @@ sudo systemctl enable --now iptables.service
 ping 192.168.2.1
 curl http://192.168.1.21:8123
 ```
+
+## Expose Ollama on LAN from the PC
+
+Ollama binds to `127.0.0.1` by default. Set `OLLAMA_HOST=0.0.0.0` to make it reachable from other devices:
+
+```bash
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0"\nEnvironment="OLLAMA_CONTEXT_LENGTH=32768"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo systemctl daemon-reload
+sudo systemctl enable --now ollama
+```
+
+Verify it's listening on all interfaces:
+
+```bash
+ss -tlnp | grep 11434
+```
+
+You want `*:11434`, not `127.0.0.1:11434`.
+
+Find your PC's LAN IP with `ip addr show` (look for the `inet` line under `eno1`). Then from another device on the same network, test:
+
+```bash
+curl http://<your-pc-ip>:11434/api/tags
+```
