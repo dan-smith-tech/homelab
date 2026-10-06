@@ -82,13 +82,13 @@ Follow the prompts. The system will automatically reboot when the configuration 
 
 ## Set up VPN
 
-do following on server and each client...
+Install WireGuard on server and clients:
 
 ```bash
 sudo pacman -S wireguard-tools
 ```
 
-restrict access of new files to only the owner, generate private key and put in file, and then use that to gen public key:
+Generate keys:
 
 ```bash
 umask 077
@@ -96,16 +96,22 @@ wg genkey > ~/.wg-private.key
 wg pubkey < ~/.wg-private.key > ~/.wg-public.key
 ```
 
-pick an internal (LAN) subnet for the tunnel (just use 192.168.2.0/24 and give each peer a unique address in that subnet by incrementing the last octet (192.168.2.1, 192.168.2.2, etc)). this subnet is used for both the server and each client
+**Router Configuration**
 
-the following can be used to check what subnets are taken but currently 192.168.2.0/24 is unused so these docs will use that:
+1.  **Disable CGN**: Ensure you have a dedicated public IP. Disable "Carrier-Grade NAT" or "Large Scale NAT" in your router settings.
+2.  **Static IP**: Assign a static LAN IP to the homelab server.
+3.  **DynDNS (No-IP)**:
+    - Create a free account at [No-IP](https://www.noip.com).
+    - Add a hostname record (e.g., `myhomelab.ddns.net`) and **enable Dynamic DNS**.
+    - In your router's DynDNS tab, set service to No-IP, enter your hostname, username, and password.
+4.  **Port Forwarding**: Add a NAT/PAT rule to the router:
+    - Internal/External Port: `51820`
+    - Protocol: `UDP`
+    - Target: Server static LAN IP
 
-```bash
-ip -4 addr show
-ip -4 route show
-```
+**Server Configuration**
 
-on server create `/etc/wireguard/wg0.conf`
+Create `/etc/wireguard/wg0.conf`:
 
 ```ini
 [Interface]
@@ -118,95 +124,44 @@ PublicKey = <contents of client ~/.wg-public.key>
 AllowedIPs = 192.168.2.2/32
 ```
 
-now need to assign static ip to the homelab sever box in router settings
+**Client Configuration**
 
-find mac address of homelab server:
+Create `/etc/wireguard/wg0.conf`:
 
-```bash
-ip link show
-```
-
-look for the bridged network and the `aa:bb:cc:dd:ee:ff` is the MAC address for the interface
-
-in the DHCP section of the router, assign a static IP to the device with the MAC address found above
-
-also add a static IP to the Home assistant interface while we're at it
-
-now find the router public ip:
-
-```bash
-curl -4 ifconfig.me
-```
-
-Go to the NAT/PAT router settings and create a new port forwarding rule with the following settings:
-
-- Protocol name (if asked): (custom) `WireGuard`
-- Internal port: `51820`
-- External port: `51820`
-- Protocol: `UDP`
-- Target: the homelab interface we assigned a static IP to above
-
-if the ISP is setting CGNAT, disable it to prevent sharing public ipv4s with others
-
-on client create `/etc/wireguard/wg0.conf`
-
-```bash
+```ini
 [Interface]
 Address = 192.168.2.2/24
 PrivateKey = <contents of client ~/.wg-private.key>
 
 [Peer]
 PublicKey = <contents of server ~/.wg-public.key>
-Endpoint = <router public IP discovered above>:51820
+Endpoint = <your-noip-hostname>.ddns.net:51820
 AllowedIPs = 192.168.2.1/32, 192.168.1.0/24
 ```
 
-create interfaces
+**Startup & Routing**
 
-on server:
-
-```bash
-sudo ip link add dev wg0 type wireguard
-sudo ip address add dev wg0 192.168.2.1/24
-```
-
-on client:
-
-```bash
-sudo ip link add dev wg0 type wireguard
-sudo ip address add dev wg0 192.168.2.2/24
-```
-
-Bring the interfaces up on both server and clients:
+Start WireGuard and enable on boot:
 
 ```bash
 sudo wg-quick up wg0
-```
-
-Enable WireGuard to start on boot:
-
-```bash
 sudo systemctl enable wg-quick@wg0
 ```
 
-### Enable IP Forwarding (Server Only)
-
-Allow the server to forward traffic between the tunnel and the LAN:
+On the server, enable IP forwarding:
 
 ```bash
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.d/99-wireguard.conf
 sudo sysctl -p /etc/sysctl.d/99-wireguard.conf
 ```
 
-### Set Up Source NAT (Server Only)
-
-Rewrite the source IP of tunnel traffic so home LAN services know how to reply back. Without this, devices on the LAN receive packets from `192.168.2.x` and try to reply directly, but the router has no route back to that subnet.
+Setup NAT so LAN devices can reply to tunnel traffic:
 
 ```bash
 sudo iptables -t nat -A POSTROUTING -o br0 -j MASQUERADE
 ```
 
-Make this persistent across reboots:
+Persist NAT rules across reboots:
 
 ```bash
 cat <<'EOF' | sudo tee /etc/iptables/iptables.rules > /dev/null
@@ -218,7 +173,9 @@ EOF
 sudo systemctl enable --now iptables.service
 ```
 
-### Test the Connection
+**Test**
+
+From a remote client, verify tunnel and LAN access:
 
 ```bash
 ping 192.168.2.1
