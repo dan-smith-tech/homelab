@@ -184,13 +184,19 @@ curl http://192.168.1.21:8123
 
 ## Expose Ollama on LAN from the PC
 
-Ollama binds to `127.0.0.1` by default. Set `OLLAMA_HOST=0.0.0.0` to make it reachable from other devices:
+Ollama binds to `127.0.0.1` by default. The system service (`ollama.service`) runs as a dedicated `ollama` user at boot — no user login or kwallet unlock is required.
+
+Set `OLLAMA_HOST=0.0.0.0` via a systemd drop-in override so it survives reboots:
 
 ```bash
 sudo mkdir -p /etc/systemd/system/ollama.service.d
-printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0"\nEnvironment="OLLAMA_CONTEXT_LENGTH=32768"\n' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo tee /etc/systemd/system/ollama.service.d/override.conf <<EOF
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0"
+Environment="OLLAMA_CONTEXT_LENGTH=32768"
+EOF
 sudo systemctl daemon-reload
-sudo systemctl enable --now ollama
+sudo systemctl restart ollama
 ```
 
 Verify it's listening on all interfaces:
